@@ -15,6 +15,7 @@ var selectedCategoryAtRow = " "
 class BestSellerViewController: UIViewController {
     //using this variable just to access the category.key outside the cellforrow at function so i can use that in the loadBooksSellers function
     let settingsContentManager = SettingsContentManager()
+    let bestSellersContentManager = BestSellerContentManager()
     var categoriesKey = " "
     var bestSellerIsbn = " "
     @IBOutlet weak var collectionView: UICollectionView!
@@ -92,8 +93,7 @@ class BestSellerViewController: UIViewController {
         let printErrors = {(error: Error) in
             print(error)
         }
-        BestSellersAPIClient.manager.getBestSellers(from: url, completionHandler: completion, errorHandler: {print($0)})
-        
+       bestSellersContentManager.getBestSellers(from: url, completionHandler: completion, errorHandler: {print($0)})
     }
 
     func loadBooks(fromBestSellers bestSeller: BestSellers,

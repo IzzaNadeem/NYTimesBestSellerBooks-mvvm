@@ -8,9 +8,8 @@
 
 import Foundation
 
-struct BestSellersAPIClient {
-    private init() {}
-    static let manager = BestSellersAPIClient()
+struct BestSellerContentManager {
+    
     func getBestSellers(from url: URL,
                        completionHandler: @escaping ([BestSellers]) -> Void,
                        errorHandler: @escaping (AppError) -> Void) {
