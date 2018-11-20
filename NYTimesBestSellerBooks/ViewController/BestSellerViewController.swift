@@ -14,8 +14,13 @@ var selectedCategoryAtRow = " "
 
 class BestSellerViewController: UIViewController {
     //using this variable just to access the category.key outside the cellforrow at function so i can use that in the loadBooksSellers function
-    let settingsContentManager = SettingsContentManager()
-    let bestSellersContentManager = BestSellerContentManager()
+    private var settingsContentManager = SettingsContentManager()
+    private var bestSellersContentManager = BestSellerContentManager()
+    private var bookDetailContentManager = BookDetailContentManager()
+    private var bestSellersViewModel = bestSellersViewModel()
+    
+    let categoriesViewModel = CategoriesViewModel()
+    
     var categoriesKey = " "
     var bestSellerIsbn = " "
     @IBOutlet weak var collectionView: UICollectionView!
@@ -107,29 +112,29 @@ class BestSellerViewController: UIViewController {
         let printErrors = {(error: Error) in
             print(error)
         }
-    BookDetailAPIClient.manager.getBookDetail(from: url, completionHandler: completion, errorHandler: {print($0)})
+    bookDetailContentManager.getBookDetail(from: url, completionHandler: completion, errorHandler: {print($0)})
     }
     
 
 }
 extension BestSellerViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+    
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        print(categories.count)
-        return categories.count
+        return categoriesViewModel.categoriesCount()
     }
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return categories[row].categoryName
+        return categoriesViewModel.categoriesAtRow(row)
     }
+    
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-
-       let category = categories[row].key
-        loadBestSellers(fromCategoryName: category)
+        loadBestSellers(fromCategoryName: categoriesViewModel.categoriesAtRowForKey(row))
     }
+    
 }
 
 extension BestSellerViewController: UICollectionViewDataSource {
@@ -139,25 +144,19 @@ extension BestSellerViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BestSellerCell", for: indexPath) as! CollectionViewCell
-        let bestSeller = bestSellers[indexPath.row]
-//        let book = books[indexPath.row]
-//        let category = categories[indexPath.row]
-//        categoriesKey = category.key
-//        bestSellerIsbn = bestSeller.isbns
+        let bestSeller = bestSellersViewModel.bestSellersAtRow(indexPath.row)
         cell.shortDescription.text = bestSeller.bookDetail.description
         cell.numberOfWeeks.text = "\(bestSeller.numberOfWeeks.description) weeks since it has been on the best sellers list"
-        loadBooks(fromBestSellers: bestSeller, completionHandler: { (book: BooksInfo?) in
-            cell.collectionViewBooks = book
-            guard let imageUrlStr = book?.volumeInfo.imageLinks?.thumbnail, let url = URL(string: imageUrlStr) else {return}
-            let completion: (Data) -> Void = {(onlineImage: Data) in
-                cell.BookImage.image = UIImage(data: onlineImage)
-                cell.setNeedsLayout()
-            }
-            NetworkHelper.manager.performDataTask(with: url , completionHandler: completion, errorHandler: {print($0)})
-        }, errorHandler: {print($0)})
-      
-        
-        
+//        loadBooks(fromBestSellers: bestSeller, completionHandler: { (book: BooksInfo?) in
+//            cell.collectionViewBooks = book
+//            guard let imageUrlStr = book?.volumeInfo.imageLinks?.thumbnail, let url = URL(string: imageUrlStr) else {return}
+//            let completion: (Data) -> Void = {(onlineImage: Data) in
+//                cell.BookImage.image = UIImage(data: onlineImage)
+//                cell.setNeedsLayout()
+//            }
+//            NetworkHelper.manager.performDataTask(with: url , completionHandler: completion, errorHandler: {print($0)})
+//        }, errorHandler: {print($0)})
+        cell.collectionViewBooks = bestSellersViewModel.booksInfoAt(bestSeller)
         
         return cell
     }

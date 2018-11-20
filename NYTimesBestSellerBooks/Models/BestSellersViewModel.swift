@@ -8,10 +8,17 @@
 
 import Foundation
 
-public class bestSellersViewModel {
+final class BestSellersViewModel {
     
     let bestSellersContentManager = BestSellerContentManager()
     let settingsContentManager = SettingsContentManager()
+    let bookDetailContentManager = BookDetailContentManager()
+    
+    var book = [BooksInfo]() {
+        didSet {
+            //do something here to reload the collectionView
+        }
+    }
     
     var bestSellersArray = [BestSellers]() {
         didSet {
@@ -55,6 +62,38 @@ public class bestSellersViewModel {
             print(error)
         }
         bestSellersContentManager.getBestSellers(from: url, completionHandler: completion, errorHandler: {print($0)})
+    }
+    
+    func loadBooks(fromBestSellers bestSeller: BestSellers,
+                   completionHandler: @escaping (BooksInfo?) -> Void,
+                   errorHandler: @escaping (AppError) -> Void) {
+        guard let isbn = bestSeller.isbns.first?.isbn10 else {return}
+        guard let url = URL(string:"https://www.googleapis.com/books/v1/volumes?q=+isbn:\(isbn)") else {return}
+        let completion = {(onlineBooks: [BooksInfo]) in
+            completionHandler(onlineBooks.first)
+        }
+        let printErrors = {(error: Error) in
+            print(error)
+        }
+        bookDetailContentManager.getBookDetail(from: url, completionHandler: completion, errorHandler: {print($0)})
+    }
+    
+    func bestSellersCount() -> Int {
+        return bestSellersArray.count
+    }
+    
+    func bestSellersAtRow(_ index: Int) -> BestSellers? {
+        return bestSellersArray[index]
+        //maybe call loadboooksatrow here? and then when data is fetched, reload collectionVC
+      
+    }
+    
+    func booksInfoAt(bestSeller: BestSellers) -> BooksInfo? {
+        var thingToReturn: BooksInfo?
+        loadBooks(fromBestSellers: bestSeller, completionHandler: { (book: BooksInfo?) in
+            thingToReturn = book
+        }, errorHandler: {print($0)}) //probably call alert
+        return thingToReturn
     }
     
 }

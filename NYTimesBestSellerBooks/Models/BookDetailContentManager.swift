@@ -8,9 +8,8 @@
 
 import Foundation
 
-struct BookDetailAPIClient {
-    private init() {}
-    static let manager = BookDetailAPIClient()
+struct BookDetailContentManager {
+   
     func getBookDetail(from url: URL,
                        completionHandler: @escaping ([BooksInfo]) -> Void,
                        errorHandler: @escaping (AppError) -> Void) {

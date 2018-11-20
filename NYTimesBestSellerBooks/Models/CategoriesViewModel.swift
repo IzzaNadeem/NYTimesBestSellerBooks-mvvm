@@ -53,5 +53,10 @@ public class CategoriesViewModel {
     func categoriesAtRow(_ row: Int) -> String {
         return categoriesArray[row].categoryName
     }
+    
+    func categoriesAtRowForKey(_ row: Int) -> String {
+        return categoriesArray[row].key
+    }
+    
 }
 
